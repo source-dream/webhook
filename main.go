@@ -5,7 +5,16 @@ import (
 	"os"
     "net/http"
     "github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
+
+func init() {
+    // 加载 .env 文件
+    err := godotenv.Load()
+    if err != nil {
+        fmt.Println("Error loading .env file")
+    }
+}
 
 type WebhookPayload struct {
     Data struct {
@@ -15,7 +24,8 @@ type WebhookPayload struct {
 
 func sendToMeow(payload WebhookPayload) {
 	userId := os.Getenv("MEOW_USER_ID")
-	url := fmt.Sprintf("http://api.chuckfang.com/%s/站点监测/%s", userId, payload.Data.Message)
+	title := os.Getenv("MEOW_TITLE")
+	url := fmt.Sprintf("http://api.chuckfang.com/%s/%s/%s", userId, title, payload.Data.Message)
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println("http.Get err:", err)

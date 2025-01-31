@@ -1,2 +1,0 @@
-$env:MEOW_USER_ID="填入你的用户ID"
-go run main.go
