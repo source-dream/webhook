@@ -34,7 +34,7 @@ jobs:
               run: GOOS=windows GOARCH=amd64 go build -o webhook_x64.exe main.go
 
             - name: Upload Binary Artifacts
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: webhook-binaries
                   path: |
