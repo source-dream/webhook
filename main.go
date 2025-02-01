@@ -26,6 +26,9 @@ func sendToMeow(payload WebhookPayload) {
 	userId := os.Getenv("MEOW_USER_ID")
 	title := os.Getenv("MEOW_TITLE")
 	url := fmt.Sprintf("http://api.chuckfang.com/%s/%s/%s", userId, title, payload.Data.Message)
+
+	fmt.Println("sendToMeow url:", url)
+
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println("http.Get err:", err)
@@ -33,7 +36,7 @@ func sendToMeow(payload WebhookPayload) {
 	}
 
 	defer resp.Body.Close()
-	fmt.Println("sendToMeow success")
+	fmt.Println("sendToMeow finished")
 }
 
 func webhookHandler(c *gin.Context) {
