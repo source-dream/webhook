@@ -67,8 +67,13 @@ func webhookHandler(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"message": "WebHook received"})
 }
 
+func helloHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "Hello, World!"})
+}
+
 func main() {
     r := gin.Default()
     r.POST("/", webhookHandler)
+	r.GET("/", helloHandler)
     r.Run(":6004")
 }
