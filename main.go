@@ -4,6 +4,7 @@ import (
     "fmt"
 	"os"
     "net/http"
+	"net/url"
     "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -25,7 +26,9 @@ type WebhookPayload struct {
 func sendToMeow(payload WebhookPayload) {
 	userId := os.Getenv("MEOW_USER_ID")
 	title := os.Getenv("MEOW_TITLE")
-	url := fmt.Sprintf("http://api.chuckfang.com/%s/%s/%s", userId, title, payload.Data.Message)
+	message := payload.Data.Message
+	encodedMessage := url.QueryEscape(message)
+	url := fmt.Sprintf("http://api.chuckfang.com/%s/%s/%s", userId, title, encodedMessage)
 
 	fmt.Println("sendToMeow url:", url)
 
