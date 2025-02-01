@@ -4,9 +4,10 @@ import (
     "fmt"
 	"os"
     "net/http"
-	"net/url"
+	// "net/url"
     "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"regexp"
 )
 
 func init() {
@@ -27,8 +28,17 @@ func sendToMeow(payload WebhookPayload) {
 	userId := os.Getenv("MEOW_USER_ID")
 	title := os.Getenv("MEOW_TITLE")
 	message := payload.Data.Message
-	encodedMessage := url.QueryEscape(message)
-	url := fmt.Sprintf("http://api.chuckfang.com/%s/%s/%s", userId, title, encodedMessage)
+	re := regexp.MustCompile(`\"(\S+) (.*?) \(`)
+	match := re.FindStringSubmatch(message)
+	prefix, siteName := "🔴", "Unknown" // 默认
+	if len(match) > 2 {
+		prefix = match[1]   // 前缀
+		siteName = match[2] // 站点名称
+	}
+	result := fmt.Sprintf("%s 站点 [%s] is down", prefix, siteName)
+
+	// encodedResult := url.QueryEscape(result)
+	url := fmt.Sprintf("http://api.chuckfang.com/%s/%s/%s", userId, title, result)
 
 	fmt.Println("sendToMeow url:", url)
 
