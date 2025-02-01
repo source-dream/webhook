@@ -8,7 +8,7 @@ on:
 jobs:
     build:
         name: Build Go Binary
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04 # ubuntu-latest
 
         steps:
             - name: Checkout Repository
@@ -22,23 +22,30 @@ jobs:
             - name: Install Dependencies
               run: go mod download
 
-            - name: Build Binary (Linux)
-              run: go build -o webhook_linux main.go
+            # **构建 Linux 静态编译版本**
+            - name: Build Linux Static Binary
+              run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o webhook_linux_static main.go
 
-            - name: Build Binary (Windows)
-              run: GOOS=windows GOARCH=amd64 go build -o webhook_x64.exe main.go
+            # **构建 Linux 动态编译版本**
+            - name: Build Linux Dynamic Binary
+              run: CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o webhook_linux_dynamic main.go
+
+            # **构建 Windows 64 位版本**
+            - name: Build Windows 64-bit Binary
+              run: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o webhook_windows_x64.exe main.go
 
             - name: Upload Binary Artifacts
               uses: actions/upload-artifact@v4
               with:
                   name: webhook-binaries
                   path: |
-                      webhook_linux
-                      webhook_x64.exe
+                      webhook_linux_static
+                      webhook_linux_dynamic
+                      webhook_windows_x64.exe
 
     release:
         needs: build
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
 
         steps:
             - name: Download build artifacts
@@ -58,22 +65,32 @@ jobs:
                   draft: false
                   prerelease: false
 
-            - name: Upload Linux Binary
+            - name: Upload Linux Static Binary
               uses: actions/upload-release-asset@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GH_PAT }}
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: webhook_linux
-                  asset_name: webhook_linux
+                  asset_path: webhook_linux_static
+                  asset_name: webhook_linux_static
                   asset_content_type: application/octet-stream
 
-            - name: Upload Windows Binary
+            - name: Upload Linux Dynamic Binary
               uses: actions/upload-release-asset@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GH_PAT }}
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: webhook_x64.exe
-                  asset_name: webhook_x64.exe
+                  asset_path: webhook_linux_dynamic
+                  asset_name: webhook_linux_dynamic
+                  asset_content_type: application/octet-stream
+
+            - name: Upload Windows 64-bit Binary
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: webhook_windows_x64.exe
+                  asset_name: webhook_windows_x64.exe
                   asset_content_type: application/octet-stream
